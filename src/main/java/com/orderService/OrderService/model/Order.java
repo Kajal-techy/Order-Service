@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "orderType", discriminatorType = DiscriminatorType.STRING)
-@Entity(name = "`order`")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "`order`")
@@ -28,15 +28,15 @@ public abstract class Order {
     @NotBlank(message = "productId.required")
     String productId;
 
-    @NotBlank
+    @NotBlank(message = "userId.required")
     String userId;
 
+    @NotBlank(message = "quantity is required")
     int quantity;
 
     @CreationTimestamp
     LocalDateTime orderDate;
 
-    @Getter(AccessLevel.NONE)
     LocalDateTime deliveryDate;
 
     public Order(String productId, String userId, int quantity) {

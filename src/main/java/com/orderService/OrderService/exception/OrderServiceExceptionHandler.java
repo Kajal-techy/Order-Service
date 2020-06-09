@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class OrderServiceExceptionHandler {
 
     @ExceptionHandler(value = InvalidType.class)
-    public ResponseEntity<InvalidType> notFoundException(InvalidType exception) {
-        log.info("Entering OrderServiceExceptionHandler.InvalidType with parameter exception {}.", exception);
+    public ResponseEntity<InvalidType> invalidException(InvalidType exception) {
+        log.info("Entering OrderServiceExceptionHandler.invalidException with parameter exception {}.", exception);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception);
     }
-
 }
