@@ -1,0 +1,43 @@
+server:
+  port: 9099
+## Spring DATASOURCE (DataSourceAutoConfiguration & DataSourceProperties)
+spring:
+  data:
+    application:
+      name: order-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/users?useSSL=false
+    username: root
+    password: P@ssword@12
+  devtools:
+    add-properties: false
+
+  # The SQL dialect makes Hibernate generate better SQL for the chosen database
+  jpa:
+    generate-ddl: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        #Hibernate ddl auto (create, create-drop, validate, update)
+        ddl-auto: update
+        show_sql: true
+
+#Eureka Client configuartion
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    instanceId: ${spring.application.name}
+
+# Feign Client
+feign:
+  client:
+    config:
+      my-client:
+        connectTimeout: 10000
+        readTimeout: 300000
+
+
+
+
