@@ -5,6 +5,7 @@ import com.orderService.OrderService.dao.ProductDao;
 import com.orderService.OrderService.dao.UserDao;
 import com.orderService.OrderService.exception.InvalidType;
 import com.orderService.OrderService.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.concurrent.*;
 
 @Service
 @Transactional
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private OrderDao orderDao;
@@ -41,28 +43,37 @@ public class OrderServiceImpl implements OrderService {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         Future userFuture = executorService.submit((Callable) () -> userDao.getUserByUserId(orderDTO.getUserId(), orderDTO.getUserId()));
         Future productFuture = executorService.submit((Callable) () -> productDao.getProductByProductId(orderDTO.getProductId()));
+
         executorService.shutdown();
-
-        User user = (User)userFuture.get();
-        Product product =  (Product)productFuture.get();
-
+        User user = null;
+        Product product = null;
         Order order = null;
-        if (user !=  null && product != null) {
-            if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.MAGIC)
-                order = new MagicOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity(),
-                        orderDTO.getPoints());
-            else if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.NORMAL)
-                order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-            else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.MAGIC)
-                order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-            else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.NORMAL)
-                order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-            else
-                throw new InvalidType("Either UserType : " + user.getUserType() + " or ProductType : " + product.getProductType() + " is invalid");
+        try {
+            user = (User) userFuture.get();
+            product = (Product) productFuture.get();
+            if (user != null && product != null) {
+                if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.MAGIC)
+                    order = new MagicOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity(),
+                            orderDTO.getPoints());
+                else if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.NORMAL)
+                    order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+                else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.MAGIC)
+                    order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+                else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.NORMAL)
+                    order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+            } else {
+                log.info("Either UserType or ProductType is null");
+                throw new InvalidType("Either UserType or ProductType is null");
+            }
             order = orderDao.save(order).get();
+
+        } catch (ExecutionException exception) {
+            log.info("Exception : " + exception.getMessage());
+            throw new InvalidType("Either UserType or ProductType is invalid" + exception);
         }
-            return order;
+        return order;
     }
+
 
     /**
      * This function is fetching the order details from database

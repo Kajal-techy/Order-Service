@@ -30,6 +30,14 @@ eureka:
   instance:
     instanceId: ${spring.application.name}
 
+# Feign Client
+feign:
+  client:
+    config:
+      my-client:
+        connectTimeout: 10000
+        readTimeout: 300000
+
 
 
 
