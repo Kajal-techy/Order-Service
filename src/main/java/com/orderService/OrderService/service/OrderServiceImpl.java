@@ -51,29 +51,24 @@ public class OrderServiceImpl implements OrderService {
         try {
             user = (User) userFuture.get();
             product = (Product) productFuture.get();
-            if (user != null && product != null) {
-                if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.MAGIC)
-                    order = new MagicOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity(),
-                            orderDTO.getPoints());
-                else if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.NORMAL)
-                    order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-                else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.MAGIC)
-                    order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-                else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.NORMAL)
-                    order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-            } else {
-                log.info("Either UserType or ProductType is null");
-                throw new InvalidType("Either UserType or ProductType is null");
-            }
-            order = orderDao.save(order).get();
-
         } catch (ExecutionException exception) {
             log.info("Exception : " + exception.getMessage());
-            throw new InvalidType("Either UserType or ProductType is invalid" + exception);
+            throw new InvalidType("Either user or product not found. Detailed message : " + exception.getMessage());
         }
-        return order;
+        if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.MAGIC)
+            order = new MagicOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity(),
+                    orderDTO.getPoints());
+        else if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.NORMAL)
+            order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+        else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.MAGIC)
+            order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+        else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.NORMAL)
+            order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+        else
+            throw new InvalidType("Either userType = " + user.getUserType() + " or productType = " + product.getProductType() + " is invalid");
+        Optional<Order> savedOrder = orderDao.save(order);
+        return savedOrder.get();
     }
-
 
     /**
      * This function is fetching the order details from database

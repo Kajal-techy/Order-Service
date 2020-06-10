@@ -33,7 +33,7 @@ public abstract class Order {
     @NotBlank(message = "userId.required")
     String userId;
 
-    @NotBlank(message = "quantity is required")
+    @NotBlank(message = "quantity.required")
     int quantity;
 
     @CreationTimestamp

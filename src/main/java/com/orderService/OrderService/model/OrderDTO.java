@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class OrderDTO {
 
-    @NotBlank(message = "productId.required")
+    @NotBlank
     String productId;
 
     @NotBlank
