@@ -2,6 +2,7 @@ package com.orderService.OrderService.controller;
 
 import com.orderService.OrderService.model.Order;
 import com.orderService.OrderService.model.OrderDTO;
+import com.orderService.OrderService.model.Shipment;
 import com.orderService.OrderService.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,12 @@ public class OrderController {
     @GetMapping("/order/{id}")
     public ResponseEntity<?> getOrderById(@PathVariable String id) {
         Order order = orderService.getOrderById(id);
+        return ResponseEntity.ok().body(order);
+    }
+
+    @PutMapping("/order/{id}")
+    public ResponseEntity<?> updateOrderById(@PathVariable String id, @RequestBody Shipment shipmentId) {
+        Order order = orderService.updateOrderById(id, shipmentId);
         return ResponseEntity.ok().body(order);
     }
 }

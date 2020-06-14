@@ -3,6 +3,7 @@ package com.orderService.OrderService.dao;
 import com.orderService.OrderService.model.Order;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,5 +24,10 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Optional<Order> getOrderById(String id) {
         return defaultOrderDao.findById(id);
+    }
+
+    @Override
+    public Optional<List<Order>> getAllOrdersByIds(List<String> ids) {
+        return Optional.of(defaultOrderDao.findAllById(ids));
     }
 }

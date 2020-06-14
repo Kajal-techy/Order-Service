@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 public class MagicOrder extends Order {
 
     public static final int SHIPMENT_DELIVERY_ADDITION = 2;
-    int points;
+    public int points = 1;
 
-    public MagicOrder(String productId, String userId, int quantity, int point) {
+    public MagicOrder(String productId, String userId, int quantity) {
         super(productId, userId, quantity);
-        this.deliveryDate = LocalDateTime.now().plusDays(SHIPMENT_DELIVERY_ADDITION);
-        this.points = point;
+        this.expectedDeliveryDate = LocalDateTime.now().plusDays(SHIPMENT_DELIVERY_ADDITION);
+        this.points = quantity * points;
     }
 }

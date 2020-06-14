@@ -4,11 +4,13 @@ import com.orderService.OrderService.dao.OrderDao;
 import com.orderService.OrderService.dao.ProductDao;
 import com.orderService.OrderService.dao.UserDao;
 import com.orderService.OrderService.exception.InvalidType;
+import com.orderService.OrderService.exception.NotFoundException;
 import com.orderService.OrderService.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 
@@ -23,11 +25,14 @@ public class OrderServiceImpl implements OrderService {
 
     private ProductDao productDao;
 
-    public OrderServiceImpl(OrderDao orderDao, UserDao userDao, ProductDao productDao) {
+    private OrderFactory orderFactory;
+
+    public OrderServiceImpl(OrderDao orderDao, UserDao userDao, ProductDao productDao, OrderFactory orderFactory) {
 
         this.orderDao = orderDao;
         this.userDao = userDao;
         this.productDao = productDao;
+        this.orderFactory = orderFactory;
     }
 
     /**
@@ -40,11 +45,12 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public Order createOrder(OrderDTO orderDTO) throws ExecutionException, InterruptedException {
+
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         Future userFuture = executorService.submit((Callable) () -> userDao.getUserByUserId(orderDTO.getUserId(), orderDTO.getUserId()));
         Future productFuture = executorService.submit((Callable) () -> productDao.getProductByProductId(orderDTO.getProductId()));
-
         executorService.shutdown();
+
         User user = null;
         Product product = null;
         Order order = null;
@@ -56,14 +62,13 @@ public class OrderServiceImpl implements OrderService {
             throw new InvalidType("Either user or product not found. Detailed message : " + exception.getMessage());
         }
         if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.MAGIC)
-            order = new MagicOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity(),
-                    orderDTO.getPoints());
+            order = orderFactory.getOrder("MAGIC", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
         else if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.NORMAL)
-            order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+            order = orderFactory.getOrder("NORMAL", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
         else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.MAGIC)
-            order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+            order = orderFactory.getOrder("NORMAL", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
         else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.NORMAL)
-            order = new NormalOrder(orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
+            order = orderFactory.getOrder("NORMAL", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
         else
             throw new InvalidType("Either userType = " + user.getUserType() + " or productType = " + product.getProductType() + " is invalid");
         Optional<Order> savedOrder = orderDao.save(order);
@@ -81,4 +86,37 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderDao.getOrderById(orderId);
         return order.orElse(null);
     }
+
+    /**
+     * This function update order by OrderId
+     * @param orderId
+     * @param shipment
+     * @return
+     */
+
+    @Override
+    public Order updateOrderById(String orderId, Shipment shipment) {
+        Optional<Order> orderFetched = orderDao.getOrderById(orderId);
+        if (orderFetched.isPresent()) {
+            orderFetched.get().setShipment(shipment);
+            Optional<Order> orderUpdated = orderDao.save(orderFetched.get());
+            if (orderUpdated.isPresent())
+                return orderUpdated.get();
+        }
+        throw new NotFoundException("No Data Found");    }
+
+    /**
+     * This function returns all exists order
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Order> getAllOrdersByOrderId(List<String> ids) {
+        Optional<List<Order>> orders = orderDao.getAllOrdersByIds(ids);
+        if (orders.isPresent())
+            return orders.get();
+        else
+            throw new NotFoundException("No Data Found");
+    }
+
 }

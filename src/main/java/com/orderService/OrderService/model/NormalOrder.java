@@ -19,7 +19,7 @@ public class NormalOrder extends Order {
 
     public NormalOrder(String productId, String userId, int quantity) {
         super(productId, userId, quantity);
-        this.deliveryDate = LocalDateTime.now().plusDays(SHIPMENT_DELIVERY_ADDITION);
+        this.expectedDeliveryDate = LocalDateTime.now().plusDays(SHIPMENT_DELIVERY_ADDITION);
     }
 }
 

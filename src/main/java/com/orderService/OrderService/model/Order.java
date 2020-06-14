@@ -1,8 +1,10 @@
 package com.orderService.OrderService.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -24,7 +26,6 @@ public abstract class Order {
     @GenericGenerator(
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(updatable = false, nullable = false)
     String orderId;
 
     @NotBlank(message = "productId.required")
@@ -36,10 +37,18 @@ public abstract class Order {
     @NotBlank(message = "quantity.required")
     int quantity;
 
+    int points;
+
+    @JsonIgnore
+    @ManyToOne(targetEntity = Shipment.class)
+    @JoinColumn(name = "shipId")
+    @ToString.Exclude
+    Shipment shipment;
+
     @CreationTimestamp
     LocalDateTime orderDate;
 
-    LocalDateTime deliveryDate;
+    LocalDateTime expectedDeliveryDate;
 
     public Order(String productId, String userId, int quantity) {
         this.productId = productId;

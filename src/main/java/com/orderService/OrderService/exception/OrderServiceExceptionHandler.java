@@ -16,4 +16,10 @@ public class OrderServiceExceptionHandler {
         log.info("Entering OrderServiceExceptionHandler.invalidException with parameter exception {}.", exception);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception);
     }
+
+    @ExceptionHandler(value = NotFoundException.class)
+    public ResponseEntity<NotFoundException> notFoundException(NotFoundException exception) {
+        log.info("Entering OrderServiceExceptionHandler.NotFoundException with parameter exception {}.", exception);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception);
+    }
 }
