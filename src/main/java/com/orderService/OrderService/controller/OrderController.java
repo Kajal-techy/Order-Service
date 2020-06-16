@@ -50,7 +50,7 @@ public class OrderController {
 
     @PutMapping("/order/{id}")
     public ResponseEntity<?> updateOrderById(@PathVariable String id, @RequestBody Shipment shipmentId) {
-        Order order = orderService.updateOrderById(id, shipmentId);
+        Order order = orderService.updateOrderWithShipment(id, shipmentId);
         return ResponseEntity.ok().body(order);
     }
 }

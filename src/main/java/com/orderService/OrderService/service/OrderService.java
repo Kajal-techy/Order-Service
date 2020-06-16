@@ -13,7 +13,7 @@ public interface OrderService {
 
     public Order getOrderById(String orderId);
 
-    public Order updateOrderById(String orderId, Shipment shipmentId);
+    public Order updateOrderWithShipment(String orderId, Shipment shipmentId);
 
     public List<Order> getAllOrdersByOrderId(List<String> ids);
 }

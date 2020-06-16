@@ -61,16 +61,9 @@ public class OrderServiceImpl implements OrderService {
             log.info("Exception : " + exception.getMessage());
             throw new InvalidType("Either user or product not found. Detailed message : " + exception.getMessage());
         }
-        if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.MAGIC)
-            order = orderFactory.getOrder("MAGIC", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-        else if (user.getUserType() == UserType.MAGIC && product.getProductType() == ProductType.NORMAL)
-            order = orderFactory.getOrder("NORMAL", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-        else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.MAGIC)
-            order = orderFactory.getOrder("NORMAL", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-        else if (user.getUserType() == UserType.NORMAL && product.getProductType() == ProductType.NORMAL)
-            order = orderFactory.getOrder("NORMAL", orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
-        else
-            throw new InvalidType("Either userType = " + user.getUserType() + " or productType = " + product.getProductType() + " is invalid");
+
+        if (user != null && product != null)
+            order = orderFactory.getOrder(user.getUserType(), product.getProductType(), orderDTO.getProductId(), orderDTO.getUserId(), orderDTO.getQuantity());
         Optional<Order> savedOrder = orderDao.save(order);
         return savedOrder.get();
     }
@@ -89,13 +82,14 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * This function update order by OrderId
+     *
      * @param orderId
      * @param shipment
      * @return
      */
 
     @Override
-    public Order updateOrderById(String orderId, Shipment shipment) {
+    public Order updateOrderWithShipment(String orderId, Shipment shipment) {
         Optional<Order> orderFetched = orderDao.getOrderById(orderId);
         if (orderFetched.isPresent()) {
             orderFetched.get().setShipment(shipment);
@@ -103,10 +97,12 @@ public class OrderServiceImpl implements OrderService {
             if (orderUpdated.isPresent())
                 return orderUpdated.get();
         }
-        throw new NotFoundException("No Data Found");    }
+        throw new NotFoundException("No Data Found with orderId " + orderId);
+    }
 
     /**
      * This function returns all exists order
+     *
      * @param ids
      * @return
      */
@@ -116,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
         if (orders.isPresent())
             return orders.get();
         else
-            throw new NotFoundException("No Data Found");
+            throw new NotFoundException("No Data Found with ids " + ids);
     }
 
 }

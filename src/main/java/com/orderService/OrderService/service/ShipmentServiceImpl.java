@@ -7,6 +7,7 @@ import com.orderService.OrderService.model.Shipment;
 import com.orderService.OrderService.model.ShipmentRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@Transactional
 public class ShipmentServiceImpl implements ShipmentService {
 
     private ShipmentDao shipmentDao;
@@ -39,7 +41,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         Optional<Shipment> shipmentCreated = shipmentDao.save(shipment);
 
         if (shipmentCreated.isPresent()) {
-            ordersFetched.forEach(orderFetched -> orderService.updateOrderById(orderFetched.getOrderId(), shipmentCreated.get()));
+            ordersFetched.forEach(orderFetched -> orderService.updateOrderWithShipment(orderFetched.getOrderId(), shipmentCreated.get()));
         } else
             throw new NotFoundException("Shipment details not saved");
         return shipmentCreated.get();
@@ -47,6 +49,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     /**
      * This function returns the shipment details by shipmentId
+     *
      * @param shipmentId
      * @return
      */
