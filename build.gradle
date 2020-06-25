@@ -27,7 +27,7 @@ dependencies {
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.1.1.RELEASE'
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'mysql:mysql-connector-java'
-    compileOnly 'org.hibernate:hibernate-validator:6.0.7.Final'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.1.1.RELEASE'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }

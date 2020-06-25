@@ -19,13 +19,13 @@ import java.util.concurrent.*;
 @Slf4j
 public class OrderServiceImpl implements OrderService {
 
-    private OrderDao orderDao;
+    private final OrderDao orderDao;
 
-    private UserDao userDao;
+    private final UserDao userDao;
 
-    private ProductDao productDao;
+    private final ProductDao productDao;
 
-    private OrderFactory orderFactory;
+    private final OrderFactory orderFactory;
 
     public OrderServiceImpl(OrderDao orderDao, UserDao userDao, ProductDao productDao, OrderFactory orderFactory) {
 
@@ -40,25 +40,23 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param orderDTO
      * @return
-     * @throws ExecutionException
      * @throws InterruptedException
      */
     @Override
-    public Order createOrder(OrderDTO orderDTO) throws ExecutionException, InterruptedException {
+    public Order createOrder(OrderDTO orderDTO) throws InterruptedException {
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         Future userFuture = executorService.submit((Callable) () -> userDao.getUserByUserId(orderDTO.getUserId(), orderDTO.getUserId()));
         Future productFuture = executorService.submit((Callable) () -> productDao.getProductByProductId(orderDTO.getProductId()));
         executorService.shutdown();
 
-        User user = null;
-        Product product = null;
+        User user;
+        Product product;
         Order order = null;
         try {
             user = (User) userFuture.get();
             product = (Product) productFuture.get();
         } catch (ExecutionException exception) {
-            log.info("Exception : " + exception.getMessage());
             throw new InvalidType("Either user or product not found. Detailed message : " + exception.getMessage());
         }
 
@@ -97,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
             if (orderUpdated.isPresent())
                 return orderUpdated.get();
         }
-        throw new NotFoundException("No Data Found with orderId " + orderId);
+        throw new NotFoundException("Order Not Found with orderId " + orderId);
     }
 
     /**
@@ -112,7 +110,6 @@ public class OrderServiceImpl implements OrderService {
         if (orders.isPresent())
             return orders.get();
         else
-            throw new NotFoundException("No Data Found with ids " + ids);
+            throw new NotFoundException("Orders not Found with ids " + ids);
     }
-
 }

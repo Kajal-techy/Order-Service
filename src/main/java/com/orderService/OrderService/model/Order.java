@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
@@ -34,7 +35,7 @@ public abstract class Order {
     @NotBlank(message = "userId.required")
     String userId;
 
-    @NotBlank(message = "quantity.required")
+    @Min(value = 1, message = "quantity.required")
     int quantity;
 
     int points;

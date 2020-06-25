@@ -18,7 +18,6 @@ import java.util.List;
 @Data
 @Entity
 @Builder
-@Table
 public class Shipment {
 
     @Id
@@ -42,7 +41,7 @@ public class Shipment {
     String destinationAddress;
 
     @OneToMany(targetEntity = Order.class, cascade = CascadeType.ALL, mappedBy = "shipment")
-    private List<Order> orders = new ArrayList<Order>();
+    List<Order> orders = new ArrayList<>();
 
     LocalDateTime shipmentDate;
 }

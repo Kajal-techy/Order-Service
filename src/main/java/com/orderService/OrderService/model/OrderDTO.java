@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 @AllArgsConstructor
@@ -11,13 +12,13 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class OrderDTO {
 
-    @NotBlank
+    @NotBlank(message = "productId.required")
     String productId;
 
-    @NotBlank
+    @NotBlank(message = "userId.required")
     String userId;
 
-    @NotBlank
+    @Min(value = 1, message = "quantity.required")
     int quantity;
 
     int points;

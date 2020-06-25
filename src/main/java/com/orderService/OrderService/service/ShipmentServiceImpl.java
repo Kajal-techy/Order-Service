@@ -1,7 +1,7 @@
 package com.orderService.OrderService.service;
 
 import com.orderService.OrderService.dao.ShipmentDao;
-import com.orderService.OrderService.exception.NotFoundException;
+import com.orderService.OrderService.exception.DependencyFailureException;
 import com.orderService.OrderService.model.Order;
 import com.orderService.OrderService.model.Shipment;
 import com.orderService.OrderService.model.ShipmentRequest;
@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +17,9 @@ import java.util.Optional;
 @Transactional
 public class ShipmentServiceImpl implements ShipmentService {
 
-    private ShipmentDao shipmentDao;
+    private final ShipmentDao shipmentDao;
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     public ShipmentServiceImpl(ShipmentDao shipmentDao, OrderService orderService) {
         this.shipmentDao = shipmentDao;
@@ -29,7 +28,6 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public Shipment createShipment(ShipmentRequest shipmentRequest) {
-        List<Order> orders = new ArrayList<>();
         List<Order> ordersFetched = orderService.getAllOrdersByOrderId(shipmentRequest.getOrderIds());
         Shipment shipment = Shipment.builder().courierName(shipmentRequest.getCourierName())
                 .destinationAddress(shipmentRequest.getDestinationAddress())
@@ -43,7 +41,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         if (shipmentCreated.isPresent()) {
             ordersFetched.forEach(orderFetched -> orderService.updateOrderWithShipment(orderFetched.getOrderId(), shipmentCreated.get()));
         } else
-            throw new NotFoundException("Shipment details not saved");
+            throw new DependencyFailureException("Shipment details not saved");
         return shipmentCreated.get();
     }
 
@@ -59,6 +57,6 @@ public class ShipmentServiceImpl implements ShipmentService {
         if (shipment.isPresent())
             return shipment.get();
         else
-            throw new NotFoundException("Shipment details not found");
+            throw new DependencyFailureException("Shipment details not found with shipmentId: " + shipmentId);
     }
 }

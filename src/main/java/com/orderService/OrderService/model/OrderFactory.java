@@ -7,10 +7,6 @@ import org.springframework.context.annotation.Configuration;
 public class OrderFactory {
 
     public Order getOrder(UserType userType, ProductType productType, String productId, String userId, int quantity) {
-
-        OrderType orderType;
-
-        Order order;
         if (userType == UserType.MAGIC && productType == ProductType.MAGIC)
             return new MagicOrder(productId, userId, quantity);
         else if (userType == UserType.MAGIC && productType == ProductType.NORMAL)
